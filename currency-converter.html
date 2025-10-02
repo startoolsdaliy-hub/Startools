@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        :root {
+            --primary-blue: #2196F3;
+            --light-blue: #E3F2FD;
+            --dark-blue: #1976D2;
+            --white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-blue);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .converter {
+            padding: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .amount-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .currency-select {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: var(--white);
+            cursor: pointer;
+            min-width: 120px;
+            transition: border-color 0.3s;
+        }
+
+        .currency-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .swap-button {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .swap-button:hover {
+            background-color: var(--dark-blue);
+        }
+
+        .swap-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .result h3 {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .converted-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+
+        .exchange-rate {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--text-light);
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--light-blue);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+            }
+            
+            .swap-button {
+                align-self: center;
+                transform: rotate(90deg);
+            }
+            
+            .converted-amount {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Currency Converter</h1>
+            <p>Get real-time exchange rates</p>
+        </div>
+        
+        <div class="converter">
+            <div class="input-group">
+                <label for="amount">Amount</label>
+                <div class="input-row">
+                    <input type="number" id="amount" class="amount-input" placeholder="Enter amount" min="0" step="0.01" value="1">
+                    <select id="from-currency" class="currency-select">
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="JPY">JPY - Japanese Yen</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                        <option value="AUD">AUD - Australian Dollar</option>
+                        <option value="CHF">CHF - Swiss Franc</option>
+                        <option value="CNY">CNY - Chinese Yuan</option>
+                        <option value="INR">INR - Indian Rupee</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-row">
+                <div class="swap-button" id="swap-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="to-currency">Convert To</label>
+                <div class="input-row">
+                    <select id="to-currency" class="currency-select">
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="JPY">JPY - Japanese Yen</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                        <option value="AUD">AUD - Australian Dollar</option>
+                        <option value="CHF">CHF - Swiss Franc</option>
+                        <option value="CNY">CNY - Chinese Yuan</option>
+                        <option value="INR">INR - Indian Rupee</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Fetching exchange rate...</p>
+            </div>
+            
+            <div class="result" id="result">
+                <h3>Converted Amount</h3>
+                <div class="converted-amount" id="converted-amount">0.00</div>
+                <div class="exchange-rate" id="exchange-rate">1 USD = 0.00 EUR</div>
+            </div>
+            
+            <div class="error-message" id="error-message">
+                Error fetching exchange rate. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const amountInput = document.getElementById('amount');
+        const fromCurrencySelect = document.getElementById('from-currency');
+        const toCurrencySelect = document.getElementById('to-currency');
+        const swapButton = document.getElementById('swap-button');
+        const convertedAmountElement = document.getElementById('converted-amount');
+        const exchangeRateElement = document.getElementById('exchange-rate');
+        const errorMessage = document.getElementById('error-message');
+        const loadingElement = document.getElementById('loading');
+        const resultElement = document.getElementById('result');
+
+        // API Configuration
+        const API_KEY = 'demo_key'; // In production, use a real API key
+        const API_BASE_URL = 'https://api.exchangerate-api.com/v4/latest/';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            convertCurrency();
+        });
+
+        // Event Listeners
+        amountInput.addEventListener('input', convertCurrency);
+        fromCurrencySelect.addEventListener('change', convertCurrency);
+        toCurrencySelect.addEventListener('change', convertCurrency);
+        
+        swapButton.addEventListener('click', () => {
+            const temp = fromCurrencySelect.value;
+            fromCurrencySelect.value = toCurrencySelect.value;
+            toCurrencySelect.value = temp;
+            convertCurrency();
+        });
+
+        // Currency Conversion Function
+        async function convertCurrency() {
+            const amount = parseFloat(amountInput.value);
+            const fromCurrency = fromCurrencySelect.value;
+            const toCurrency = toCurrencySelect.value;
+            
+            // Input validation
+            if (isNaN(amount) || amount < 0) {
+                showError('Please enter a valid amount');
+                return;
+            }
+            
+            // Show loading
+            loadingElement.style.display = 'block';
+            resultElement.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            try {
+                // In a real implementation, you would use a live API
+                // For this demo, we'll use mock data that simulates real exchange rates
+                const exchangeRate = await fetchExchangeRate(fromCurrency, toCurrency);
+                
+                if (exchangeRate) {
+                    const convertedAmount = (amount * exchangeRate).toFixed(2);
+                    convertedAmountElement.textContent = formatCurrency(convertedAmount, toCurrency);
+                    exchangeRateElement.textContent = `1 ${fromCurrency} = ${exchangeRate.toFixed(4)} ${toCurrency}`;
+                    
+                    // Show result
+                    loadingElement.style.display = 'none';
+                    resultElement.style.display = 'block';
+                } else {
+                    throw new Error('Failed to fetch exchange rate');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                loadingElement.style.display = 'none';
+                showError('Failed to fetch exchange rate. Please try again.');
+            }
+        }
+
+        // Fetch exchange rate from API (mock implementation for demo)
+        async function fetchExchangeRate(fromCurrency, toCurrency) {
+            // In a real implementation, you would make an API call here
+            // For demo purposes, we'll use mock data
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Mock exchange rates (these would come from an API in production)
+            const mockRates = {
+                USD: { EUR: 0.85, GBP: 0.73, JPY: 110.25, CAD: 1.25, AUD: 1.35, CHF: 0.92, CNY: 6.45, INR: 74.50 },
+                EUR: { USD: 1.18, GBP: 0.86, JPY: 129.75, CAD: 1.47, AUD: 1.59, CHF: 1.08, CNY: 7.59, INR: 87.65 },
+                GBP: { USD: 1.37, EUR: 1.16, JPY: 151.00, CAD: 1.71, AUD: 1.85, CHF: 1.26, CNY: 8.84, INR: 102.10 },
+                JPY: { USD: 0.0091, EUR: 0.0077, GBP: 0.0066, CAD: 0.0113, AUD: 0.0122, CHF: 0.0083, CNY: 0.0585, INR: 0.676 },
+                CAD: { USD: 0.80, EUR: 0.68, GBP: 0.58, JPY: 88.50, AUD: 1.08, CHF: 0.74, CNY: 5.16, INR: 59.60 },
+                AUD: { USD: 0.74, EUR: 0.63, GBP: 0.54, JPY: 81.85, CAD: 0.93, CHF: 0.68, CNY: 4.78, INR: 55.20 },
+                CHF: { USD: 1.09, EUR: 0.93, GBP: 0.79, JPY: 120.50, CAD: 1.35, AUD: 1.47, CNY: 7.01, INR: 81.00 },
+                CNY: { USD: 0.155, EUR: 0.132, GBP: 0.113, JPY: 17.10, CAD: 0.194, AUD: 0.209, CHF: 0.143, INR: 11.55 },
+                INR: { USD: 0.0134, EUR: 0.0114, GBP: 0.0098, JPY: 1.48, CAD: 0.0168, AUD: 0.0181, CHF: 0.0123, CNY: 0.0865 }
+            };
+            
+            // Return the mock rate or null if not found
+            return mockRates[fromCurrency]?.[toCurrency] || null;
+        }
+
+        // Format currency for display
+        function formatCurrency(amount, currency) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currency,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            resultElement.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
