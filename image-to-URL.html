@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> image to url converter| multi tool website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 550px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #6c5ce7;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #6c5ce7;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #483d8b;
+        }
+        #result-area {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px dashed #6c5ce7;
+            background-color: #f1f0ff;
+            border-radius: 4px;
+            word-wrap: break-word;
+        }
+        #url-output {
+            font-weight: bold;
+            color: #2ecc71;
+            cursor: pointer;
+        }
+        #url-output:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📸 image to url Generator</h1>
+        
+        <input type="file" id="photo-input" accept="image/*">
+        
+        <button onclick="uploadImage()">URL Generate Karein</button>
+        
+        <div id="result-area">
+            <p id="status-message">⬆️ please add one image or "URL Generate Karein" click here  </p>
+            <p id="url-display" style="display: none;">Generated URL (Copy Kar Lein): 
+                <span id="url-output" onclick="copyUrl()"></span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // *** यहाँ अपनी Cloudinary और Preset जानकारी बदलें ***
+        const CLOUD_NAME = "drkllpsyz"; 
+        const UPLOAD_PRESET = "photo_app_preset"; // वह नाम जो आपने Cloudinary में बनाया है
+        // *******************************************************
+        
+        const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+        function uploadImage() {
+            const photoInput = document.getElementById('photo-input');
+            const file = photoInput.files[0];
+            const statusMessage = document.getElementById('status-message');
+            const urlDisplay = document.getElementById('url-display');
+            const urlOutput = document.getElementById('url-output');
+
+            urlDisplay.style.display = 'none';
+            urlOutput.textContent = '';
+            
+            if (!file) {
+                statusMessage.textContent = "❌ add a image to generate url link 🔗";
+                return;
+            }
+
+            statusMessage.textContent = "⏳ please wait url generate";
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+
+            // API Call
+            fetch(CLOUDINARY_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Upload Failed: Server returned an error.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Cloudinary response से secure_url प्राप्त करना
+                const generatedUrl = data.secure_url; 
+                
+                urlOutput.textContent = generatedUrl;
+                urlDisplay.style.display = 'block';
+                statusMessage.textContent = "✅ URL successful generate ! copy this url link";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusMessage.textContent = `❌ अपलोड असफल रहा। Cloudinary Preset (Upload Preset) चेक करें। Error: ${error.message}`;
+            });
+        }
+
+        // URL को कॉपी करने का फंक्शन
+        function copyUrl() {
+            const urlText = document.getElementById('url-output').textContent;
+            navigator.clipboard.writeText(urlText).then(() => {
+                alert("URL कॉपी कर लिया गया है: " + urlText);
+            }).catch(err => {
+                console.error('Copy karne mein error:', err);
+            });
+        }
+    </script>
+
+</body>
+</html>
